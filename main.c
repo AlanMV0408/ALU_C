@@ -6,7 +6,7 @@ typedef struct
     uint32_t signo;
     int32_t exponente;
     uint32_t mantissa;
-}DecodeFloat;
+}DecodedFloat;
 
 DecodedFloat decode(float f){
     uint32_t reg;
@@ -21,3 +21,10 @@ DecodedFloat decode(float f){
     return df;
 }
 
+float suma_binaria(float a, float b){
+    DecodedFloat da = decode(a);
+    
+
+
+
+}
