@@ -29,7 +29,7 @@ float suma_binaria(float a, float b){
         da.mantissa >>= 1;
         da.exponente++;
     }
-    while(db.exponente < db.exponente){
+    while(db.exponente < da.exponente){
         db.mantissa >>= 1;
         db.exponente++;
     }
@@ -37,7 +37,7 @@ float suma_binaria(float a, float b){
     uint32_t res_mantissa = da.mantissa + db.mantissa;
     int32_t res_exponente = da.exponente;
 
-    if(res_exponente & 0x1000000){
+    if(res_mantissa & 0x1000000){
         res_mantissa >>= 1;
         res_exponente++;
     }
@@ -47,3 +47,13 @@ float suma_binaria(float a, float b){
     return *(float*)&res_reg;
 }
 
+int main(){
+    float n1 = 3.5f;
+    float n2 = 2.5f;
+
+    float result = suma_binaria(n1,n2);
+
+    printf("Resultado de la suma: %f\n",result);
+
+    return 0;
+}
