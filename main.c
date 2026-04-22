@@ -40,26 +40,55 @@ float suma_binaria(float a, float b){
     DecodedFloat numA = decode(a);
     DecodedFloat numB = decode(b);
 
-    while(da.exponente < db.exponente){
-        da.mantissa >>= 1;
-        da.exponente++;
-    }
-    while(db.exponente < da.exponente){
-        db.mantissa >>= 1;
-        db.exponente++;
-    }
+    if(numA.mantissa == 0)
+        return b;
+    if(numB.mantissa == 0)
+        return a;
 
-    uint32_t res_mantissa = da.mantissa + db.mantissa;
-    int32_t res_exponente = da.exponente;
-
-    if(res_mantissa & 0x1000000){
-        res_mantissa >>= 1;
-        res_exponente++;
+    while(numA.exponente < numB.exponente){
+        numA.mantissa >>= 1;
+        numA.exponente++;
+    }
+    while(numB.exponente < numA.exponente){
+        numB.mantissa >>= 1;
+        numB.exponente++;
     }
 
-    uint32_t res_reg = (da.signo << 31) | ((res_exponente + 127) << 23 | (res_mantissa & 0x7FFFFF));
+    uint32_t res_mantissa;
+    uint32_t signo_res;
+    int32_t res_exponente = numA.exponente;
 
-    return *(float*)&res_reg;
+    if(numA.signo == numB.signo){
+        res_mantissa = numA.mantissa + numB.mantissa;
+        signo_res = numA.signo;
+
+        if(res_mantissa & 0x1000000){
+            res_mantissa >>= 1;
+            res_exponente++;
+        }
+    }
+    else{
+        if(numA.mantissa >= numB.mantissa){
+            res_mantissa = numA.mantissa - numB.mantissa;
+            signo_res = numA.signo;
+        }
+        else{
+            res_mantissa = numB.mantissa - numA.mantissa;
+            signo_res = numB.signo;
+        }
+
+        if(res_mantissa == 0)
+            return 0.0f;
+
+        while ((res_mantissa & 0x800000) == 0)
+        {
+            res_mantissa <<= 1;
+            res_exponente--;
+        }
+    }
+
+    return encode(signo_res, res_exponente, res_mantissa);
+
 }
 
 int main(){
