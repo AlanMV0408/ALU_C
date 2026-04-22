@@ -149,12 +149,28 @@ float division_binaria(float a, float b){
 }
 
 int main(){
-    float n1 = 3.5f;
-    float n2 = 2.5f;
+    float a = 3.5f;
+    float b = 2.5f;
 
-    float result = suma_binaria(n1,n2);
+    printf("------- OPERACIONES CON PUNTO FLOTANTE (IEEE 754) -------\n");
+    printf("A = %f\nB = %f\n\n", a, b);
 
-    printf("Resultado de la suma: %f\n",result);
+    printf("--- SUMA ---\n");
+    printf("Hardware: %f\n", a + b);
+    printf("Manual:   %f\n\n", suma_binaria(a, b));
+
+    printf("--- RESTA ---\n");
+    printf("Hardware: %f\n", a - b);
+    printf("Manual:   %f\n\n", resta_binaria(a, b));
+
+    printf("--- MULTIPLICACION ---\n");
+    printf("Hardware: %f\n", a * b);
+    printf("Manual:   %f\n\n", multiplicacion_binaria(a, b));
+
+    printf("--- DIVISION ---\n");
+    printf("Hardware: %f\n", a / b);
+    printf("Manual:   %f\n\n", division_binaria(a, b));
+
 
     return 0;
 }
