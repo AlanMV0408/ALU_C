@@ -99,6 +99,30 @@ float resta_binaria(float a, float b){
     return suma_binaria(a, b_negativo);
 }
 
+float multiplicacion_binaria(float a, float b){
+    DecodedFloat numA = decode(a);
+    DecodedFloat numB = decode(b);
+
+    if(numA.mantissa == 0 || numB.mantissa == 0)
+        return 0.0f;
+
+    uint32_t signo_res = numA.signo ^ numB.signo;
+
+    int32_t exponente_res = numA.exponente + numB.exponente;
+
+    uint32_t producto_mantissa = (uint64_t)numA.mantissa * numB.mantissa;
+
+    if(producto_mantissa & (1ULL << 47)){
+        producto_mantissa >>= 24;
+        exponente_res++;
+    }
+    else{
+        producto_mantissa >>= 23;
+    }
+
+    return encode(signo_res, exponente_res, (uint32_t)producto_mantissa);
+}
+
 int main(){
     float n1 = 3.5f;
     float n2 = 2.5f;
