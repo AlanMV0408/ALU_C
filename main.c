@@ -91,6 +91,14 @@ float suma_binaria(float a, float b){
 
 }
 
+float resta_binaria(float a, float b){
+    uint32_t bitsB = *(uint32_t*)&b;
+    bitsB ^= 0x80000000;
+    float b_negativo = *(float*)&bitsB;
+
+    return suma_binaria(a, b_negativo);
+}
+
 int main(){
     float n1 = 3.5f;
     float n2 = 2.5f;
