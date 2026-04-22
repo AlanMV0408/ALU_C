@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-
+#include <math.h>
 typedef struct 
 {
     uint32_t signo;
@@ -9,21 +9,36 @@ typedef struct
 }DecodedFloat;
 
 DecodedFloat decode(float f){
-    uint32_t reg;
+    uint32_t bits = *(uint32_t*)&f;
+    DecodedFloat num;
 
-    reg = *(uint32_t*)&f;
-    DecodedFloat df;
-    df.signo = (reg >> 31) & 1;
-    df.exponente = ((reg >> 23) & 0xFF) - 127;
-    
-    df.mantissa = (reg & 0x7FFFFF) | 0X800000;
+    num.signo = (bits >> 31) & 1;
+    num.exponente = ((bits >> 23) & 0xFF) - 127;
+    num.mantissa = (bits & 0x7FFFFF) | 0X800000;
 
-    return df;
+    if((bits & 0x7FFFFFF) == 0){
+        num.exponente = 0;
+        num.mantissa = 0;
+    }
+    return num;
 }
 
+float encode(uint32_t signo, int32_t exponente, uint32_t mantissa){
+
+    if(mantissa == 0) 
+        return 0.0f;
+
+    mantissa &= 0x7FFFFF;
+    uint32_t bits = (signo << 31) | ((exponente + 127) << 23) | mantissa;
+
+    return *(float*)&bits;
+}
+
+
+
 float suma_binaria(float a, float b){
-    DecodedFloat da = decode(a);
-    DecodedFloat db = decode(b);
+    DecodedFloat numA = decode(a);
+    DecodedFloat numB = decode(b);
 
     while(da.exponente < db.exponente){
         da.mantissa >>= 1;
