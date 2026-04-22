@@ -123,6 +123,31 @@ float multiplicacion_binaria(float a, float b){
     return encode(signo_res, exponente_res, (uint32_t)producto_mantissa);
 }
 
+float division_binaria(float a, float b){
+    DecodedFloat numA = decode(a);
+    DecodedFloat numB = decode(b);
+
+    if(numB.mantissa == 0){
+        printf("Error: División por cero\n");
+        return 0.0f;
+    }
+    if(numA.mantissa == 0)
+        return 0.0f;
+
+    uint32_t signo_res = numA.signo ^ numB.signo;
+
+    int32_t exponente_res = numA.exponente - numB.exponente;
+
+    uint32_t division_mantissa = ((uint64_t)numA.mantissa << 23) / numB.mantissa; 
+
+    if((division_mantissa & 0x800000) == 0){
+        division_mantissa <<= 1;
+        exponente_res--;
+    }
+
+    return encode(signo_res, exponente_res, division_mantissa);
+}
+
 int main(){
     float n1 = 3.5f;
     float n2 = 2.5f;
