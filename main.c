@@ -8,6 +8,16 @@ typedef struct
     uint32_t mantissa;
 }DecodedFloat;
 
+void mostrar_binarios(float f){
+    uint32_t bits = *(uint32_t*)&f;
+    for(int i = 31; i >= 0; i--){
+        printf("%d", (bits >> i) & 1);
+        if(i == 31 || i == 23)
+            printf(" ");
+    }
+    printf("\n");
+}
+
 DecodedFloat decode(float f){
     uint32_t bits = *(uint32_t*)&f;
     DecodedFloat num;
@@ -157,6 +167,7 @@ int main(){
     printf("Escoge el segundo numero para realizar las operaciones de punto flotante: ");
     scanf ("%f", &b);
 
+    
     printf("------- OPERACIONES CON PUNTO FLOTANTE (IEEE 754) -------\n");
     printf("A = %f\nB = %f\n\n", a, b);
 
