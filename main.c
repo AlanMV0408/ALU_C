@@ -138,7 +138,7 @@ float division_binaria(float a, float b){
     DecodedFloat numB = decode(b);
 
     if(numB.mantissa == 0){
-        printf("Error: División por cero\n");
+        printf("Error: Division por cero\n");
         return 0.0f;
     }
     if(numA.mantissa == 0)
@@ -174,19 +174,25 @@ int main(){
     printf("--- SUMA ---\n");
     printf("Hardware: %f\n", a + b);
     printf("Manual:   %f\n\n", suma_binaria(a, b));
-
+    printf("Binario (en base 2): "); mostrar_binarios(suma_binaria(a, b));
+    printf ("\n");
+    
     printf("--- RESTA ---\n");
     printf("Hardware: %f\n", a - b);
     printf("Manual:   %f\n\n", resta_binaria(a, b));
-
+    printf ("Binario (en base 2): "); mostrar_binarios(resta_binaria(a, b));
+    printf ("\n");
+    
     printf("--- MULTIPLICACION ---\n");
     printf("Hardware: %f\n", a * b);
     printf("Manual:   %f\n\n", multiplicacion_binaria(a, b));
+    printf ("Binario (en base 2): "); mostrar_binarios(multiplicacion_binaria(a, b));
+    printf ("\n");
 
     printf("--- DIVISION ---\n");
     printf("Hardware: %f\n", a / b);
     printf("Manual:   %f\n\n", division_binaria(a, b));
-
+    printf ("Binario (en base 2) : "); mostrar_binarios(division_binaria(a, b));
 
     return 0;
 }
