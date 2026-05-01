@@ -149,8 +149,13 @@ float division_binaria(float a, float b){
 }
 
 int main(){
-    float a = 3.5f;
-    float b = 2.5f;
+    float a;
+    float b;
+
+ printf("Bienvenido!, escoge el primer numero para realizar las operaciones de punto flotante: ");
+    scanf ("%f", &a);
+    printf("Escoge el segundo numero para realizar las operaciones de punto flotante: ");
+    scanf ("%f", &b);
 
     printf("------- OPERACIONES CON PUNTO FLOTANTE (IEEE 754) -------\n");
     printf("A = %f\nB = %f\n\n", a, b);
