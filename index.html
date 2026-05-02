@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador ALU - IEEE 754</title>
+    <style>
+        :root {
+            --bg: #1e1e1e;
+            --text: #ffffff;
+            --sign: #ff5555;
+            --exp: #50fa7b;
+            --mant: #8be9fd;
+            --box-bg: #282a36;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--box-bg);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+        }
+        select {
+            background-color: #fff;
+            color: #000;
+            cursor: pointer;
+        }
+        button {
+            background-color: #bd93f9;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #ff79c6; }
+        button:disabled { background-color: #6272a4; cursor: not-allowed; }
+        
+        .bits-display {
+            font-family: monospace;
+            font-size: 18px;
+            letter-spacing: 2px;
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            word-wrap: break-word;
+        }
+        .sign { color: var(--sign); font-weight: bold; }
+        .exp { color: var(--exp); font-weight: bold; }
+        .mant { color: var(--mant); font-weight: bold; }
+        
+        .step-box {
+            background-color: #44475a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 5px solid #bd93f9;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #pasos { margin-top: 20px; }
+        .math-block { font-family: monospace; text-align:center; font-size: 18px; background: #282a36; padding: 10px; border-radius: 5px; margin: 10px 0;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 style="text-align: center;">ALU: Operaciones Punto Flotante</h1>
+        
+        <div class="controls">
+            <input type="number" id="numA" step="any" value="5.5" placeholder="Número A">
+            
+            <select id="operacion">
+                <option value="suma">Suma (+)</option>
+                <option value="resta">Resta (-)</option>
+                <option value="multiplicacion">Multiplicación (*)</option>
+                <option value="division">División (/)</option>
+            </select>
+
+            <input type="number" id="numB" step="any" value="2.25" placeholder="Número B">
+            
+            <button onclick="iniciarSimulacion()">Iniciar Simulación</button>
+            <button onclick="siguientePaso()" id="btnSiguiente" disabled>Siguiente Paso</button>
+        </div>
+
+        <div id="pasos">
+            </div>
+    </div>
+
+    <script>
+        let pasoActual = 0;
+        let dataA, dataB;
+        let operacionSeleccionada = "";
+
+        function obtenerBits(numero) {
+            const buffer = new ArrayBuffer(4);
+            new Float32Array(buffer)[0] = numero;
+            const entero32 = new Uint32Array(buffer)[0];
+            const bitsStr = entero32.toString(2).padStart(32, '0');
+            
+            return {
+                original: numero,
+                signo: bitsStr[0],
+                exponenteBin: bitsStr.substring(1, 9),
+                exponenteDec: parseInt(bitsStr.substring(1, 9), 2) - 127,
+                mantisaBin: bitsStr.substring(9)
+            };
+        }
+
+        function colorearBits(data) {
+            return `<div class="bits-display">
+                <span class="sign" title="Signo">${data.signo}</span> 
+                <span class="exp" title="Exponente">${data.exponenteBin}</span> 
+                <span class="mant" title="Mantisa">${data.mantisaBin}</span>
+            </div>`;
+        }
+
+        function iniciarSimulacion() {
+            const valA = parseFloat(document.getElementById('numA').value);
+            const valB = parseFloat(document.getElementById('numB').value);
+            operacionSeleccionada = document.getElementById('operacion').value;
+            
+            dataA = obtenerBits(valA);
+            dataB = obtenerBits(valB);
+            
+            document.getElementById('pasos').innerHTML = ""; 
+            pasoActual = 0;
+            document.getElementById('btnSiguiente').disabled = false;
+            
+            siguientePaso();
+        }
+
+        function siguientePaso() {
+            const contenedor = document.getElementById('pasos');
+            let contenido = "";
+
+            if (pasoActual === 0) {
+                // Aquí agregamos tu bloque de código con la leyenda y el exponente real
+                contenido = `
+                    <div class="step-box">
+                        <h3>Paso 1: Decodificación (Extracción de Bits)</h3>
+                        <p>La ALU extrae los bits de los números. <br>
+                        <span class="sign">Rojo: Signo</span> | <span class="exp">Verde: Exponente</span> | <span class="mant">Azul: Mantisa</span></p>
+                        <p><strong>Número A (${dataA.original}):</strong> Exponente real: ${dataA.exponenteDec}</p>
+                        ${colorearBits(dataA)}
+                        <p><strong>Número B (${dataB.original}):</strong> Exponente real: ${dataB.exponenteDec}</p>
+                        ${colorearBits(dataB)}
+                    </div>`;
+            } 
+            else if (pasoActual === 1) {
+                if (operacionSeleccionada === "suma" || operacionSeleccionada === "resta") {
+                    let diff = Math.abs(dataA.exponenteDec - dataB.exponenteDec);
+                    let accion = operacionSeleccionada === "resta" ? "<p><em>Nota: Al ser una resta, la ALU invierte el bit de signo de B (o usa complemento a 2) antes de operar.</em></p>" : "";
+                    contenido = `
+                        <div class="step-box">
+                            <h3>Paso 2: Alinear Exponentes</h3>
+                            ${accion}
+                            <p>En sumas y restas, los puntos decimales deben coincidir. La diferencia entre los exponentes es de <strong>${diff} posiciones</strong>.</p>
+                            <p>La ALU toma la mantisa del número más pequeño y la desplaza ${diff} bits a la derecha para igualar los exponentes.</p>
+                        </div>`;
+                } else if (operacionSeleccionada === "multiplicacion") {
+                    contenido = `
+                        <div class="step-box">
+                            <h3>Paso 2: Signo y Exponente</h3>
+                            <p><strong>1. Nuevo Signo:</strong> La ALU pasa los bits de signo por una compuerta <strong>XOR</strong> (${dataA.signo} XOR ${dataB.signo} = ${dataA.signo ^ dataB.signo}).</p>
+                            <p><strong>2. Nuevo Exponente:</strong> Se suman los exponentes reales y se les vuelve a aplicar el sesgo (bias):</p>
+                            <div class="math-block">Exp = (${dataA.exponenteDec} + ${dataB.exponenteDec}) + 127</div>
+                        </div>`;
+                } else if (operacionSeleccionada === "division") {
+                    contenido = `
+                        <div class="step-box">
+                            <h3>Paso 2: Signo y Exponente</h3>
+                            <p><strong>1. Nuevo Signo:</strong> Compuerta <strong>XOR</strong> entre los signos (${dataA.signo} XOR ${dataB.signo} = ${dataA.signo ^ dataB.signo}).</p>
+                            <p><strong>2. Nuevo Exponente:</strong> Se restan los exponentes reales y se les vuelve a aplicar el sesgo (bias):</p>
+                            <div class="math-block">Exp = (${dataA.exponenteDec} - ${dataB.exponenteDec}) + 127</div>
+                        </div>`;
+                }
+            }
+            else if (pasoActual === 2) {
+                let operadorLogico = "";
+                let textoOperacion = "";
+                
+                if (operacionSeleccionada === "suma") { operadorLogico = "+"; textoOperacion = "suman"; }
+                if (operacionSeleccionada === "resta") { operadorLogico = "-"; textoOperacion = "restan"; }
+                if (operacionSeleccionada === "multiplicacion") { operadorLogico = "*"; textoOperacion = "multiplican"; }
+                if (operacionSeleccionada === "division") { operadorLogico = "/"; textoOperacion = "dividen"; }
+
+                contenido = `
+                    <div class="step-box">
+                        <h3>Paso 3: Operación de Mantisas</h3>
+                        <p>La ALU restaura el "1" implícito a la izquierda de ambas mantisas y las ${textoOperacion} en su circuito aritmético.</p>
+                        <div class="math-block">
+                            &nbsp;&nbsp;1.${dataA.mantisaBin}<br>
+                            ${operadorLogico} 1.${dataB.mantisaBin}<br>
+                            -------------------------<br>
+                            <em>(Procesando en la ALU...)</em>
+                        </div>
+                    </div>`;
+            }
+            else if (pasoActual === 3) {
+                let resHardware = 0;
+                if (operacionSeleccionada === "suma") resHardware = dataA.original + dataB.original;
+                if (operacionSeleccionada === "resta") resHardware = dataA.original - dataB.original;
+                if (operacionSeleccionada === "multiplicacion") resHardware = dataA.original * dataB.original;
+                if (operacionSeleccionada === "division") resHardware = dataA.original / dataB.original;
+
+                let dataRes = obtenerBits(resHardware);
+                
+                contenido = `
+                    <div class="step-box">
+                        <h3>Paso 4: Normalización y Empaquetado</h3>
+                        <p>La ALU revisa el resultado de la operación anterior. Si el punto decimal se movió (desbordamiento o pérdida de precisión), ajusta el exponente sumando o restando.</p>
+                        <p>Finalmente, oculta el "1" implícito, une el Signo, el Exponente ajustado y los primeros 23 bits de la nueva Mantisa.</p>
+                        <p><strong>Resultado Final (${resHardware}):</strong></p>
+                        ${colorearBits(dataRes)}
+                        <h2 style="text-align:center; color: #50fa7b;">¡Ciclo de Instrucción Terminado!</h2>
+                    </div>`;
+                document.getElementById('btnSiguiente').disabled = true;
+            }
+
+            contenedor.innerHTML += contenido;
+            pasoActual++;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
